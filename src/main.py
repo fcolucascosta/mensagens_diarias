@@ -1,6 +1,6 @@
 import os
 import datetime
-import pytz # Will need to add this to requirements if strict timezone handling is needed, but standard datetime often suffices for simple checks. Actually, let's use simple logic first.
+
 from scrapers.youtube import YouTubeScraper
 from scrapers.web import WebScraper
 from notifiers.whatsapp import WhatsAppNotifier
