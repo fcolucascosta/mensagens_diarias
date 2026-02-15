@@ -3,21 +3,24 @@ import datetime
 
 from scrapers.youtube import YouTubeScraper
 from scrapers.web import WebScraper
+from scrapers.youtube import YouTubeScraper
+from scrapers.web import WebScraper
 from notifiers.whatsapp import WhatsAppNotifier
 
 def main():
     # 1. Configuration (Load from Env Vars)
-    # These secrets will be set in GitHub Repository Settings
-    # 1. Configuration (Load from Env Vars or Default)
     # Defaults are based on user request
     CHANNEL_ID_WEEKDAY = os.getenv('YOUTUBE_CHANNEL_WEEKDAY') or 'UCP6L9TPS3pHccVRiDB_cvqQ' # Padre Paulo Ricardo
     CHANNEL_ID_SATURDAY = os.getenv('YOUTUBE_CHANNEL_SATURDAY') or 'UCuQH2IQ95hg72ZmC0P5V-bg' # Padre Mario Sartori
     
-    # 2. Determine Day of Week
+    # 2. Determine Day of Week (Brazil Time UTC-3)
     # 0 = Monday, 6 = Sunday
-    today = datetime.datetime.now().weekday()
+    utc_now = datetime.datetime.utcnow()
+    br_time = utc_now - datetime.timedelta(hours=3)
+    today = br_time.weekday()
     
-    print(f"Running for day index: {today}")
+    print(f"Current Brazil Time: {br_time}")
+    print(f"Running for day index: {today} (0=Mon, 6=Sun)")
 
     # Logic: 
     # Mon-Fri (0-4) + Sun (6)? User said "Domingo a Sexta" (Sun-Fri) is one channel.
@@ -39,10 +42,15 @@ def main():
     # 4. Fetch YouTube Video
     video = None
     if target_channel_id:
+        print(f"Checking channel ID: {target_channel_id}")
         # Pattern to verify if it is the correct video (User requested "homilia" must be in title)
         video = yt_scraper.get_latest_video(target_channel_id, title_pattern="homilia")
+        if video:
+            print(f"✅ Video found: {video['title']}")
+        else:
+            print("⚠️ No video found matching pattern 'homilia' or channel is empty.")
     else:
-        print("No Channel ID configured for today.")
+        print("⚠️ No Channel ID configured for today.")
 
     # 5. Fetch Website Text
     web_text = None

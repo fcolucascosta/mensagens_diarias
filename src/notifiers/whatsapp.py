@@ -4,39 +4,41 @@ import json
 
 class WhatsAppNotifier:
     def __init__(self):
-        # Green API Credentials
-        self.instance_id = os.getenv('GREEN_API_INSTANCE_ID')
-        self.api_token = os.getenv('GREEN_API_TOKEN')
+        # WPPConnect Server Configuration
+        # Default URL for local docker container: http://localhost:21465
+        self.base_url = os.getenv('WPPCONNECT_SERVER_URL', 'http://localhost:21465')
+        self.session_key = os.getenv('WPPCONNECT_SESSION_KEY', 'zapdiario_session')
+        self.token = os.getenv('WPPCONNECT_SECRET_KEY', 'THISISMYSECURETOKEN')
         self.recipient_phone = os.getenv('WHATSAPP_RECIPIENT_PHONE')
-        
-        # Base URL for Green API
-        # Format: https://api.green-api.com/waInstance{{idInstance}}/{{method}}/{{apiTokenInstance}}
-        if self.instance_id and self.api_token:
-            self.base_url = f"https://api.green-api.com/waInstance{self.instance_id}"
 
     def send_message(self, message):
-        if not self.instance_id or not self.api_token or not self.recipient_phone:
-            print("Error: GREEN_API_INSTANCE_ID, GREEN_API_TOKEN, or WHATSAPP_RECIPIENT_PHONE not set.")
+        if not self.recipient_phone:
+            print("Error: WHATSAPP_RECIPIENT_PHONE not set.")
             return False
 
-        url = f"{self.base_url}/sendMessage/{self.api_token}"
+        # WPPConnect API Endpoint: /api/:session/send-message
+        url = f"{self.base_url}/api/{self.session_key}/send-message"
         
-        # Green API expects chatId in format: "11001234567@c.us"
-        chat_id = f"{self.recipient_phone}@c.us"
-
+        # Ensure phone number formatting (WPPConnect is flexible but prefers DDI+DDD+Number)
+        # Assuming input is like 558599...
+        
         payload = {
-            "chatId": chat_id,
-            "message": message
+            "phone": self.recipient_phone,
+            "message": message,
+            "isGroup": False
         }
 
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {self.token}'
         }
 
         try:
+            print(f"Sending to {url}...")
             response = requests.post(url, headers=headers, json=payload)
-            if response.status_code == 200:
-                print("Message sent successfully!")
+            
+            if response.status_code == 201 or response.status_code == 200:
+                print("Message sent successfully! (WPPConnect)")
                 return True
             else:
                 print(f"Failed to send message. Status: {response.status_code}, Response: {response.text}")
