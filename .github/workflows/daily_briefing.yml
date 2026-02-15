@@ -26,10 +26,9 @@ jobs:
 
     - name: Run automation script
       env:
-        WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
-        CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}
+        GREEN_API_INSTANCE_ID: ${{ secrets.GREEN_API_INSTANCE_ID }}
+        GREEN_API_TOKEN: ${{ secrets.GREEN_API_TOKEN }}
+        WHATSAPP_RECIPIENT_PHONE: ${{ secrets.WHATSAPP_RECIPIENT_PHONE }}
         YOUTUBE_CHANNEL_WEEKDAY: ${{ secrets.YOUTUBE_CHANNEL_WEEKDAY }}
         YOUTUBE_CHANNEL_SATURDAY: ${{ secrets.YOUTUBE_CHANNEL_SATURDAY }}
-        WEBSITE_URL: ${{ secrets.WEBSITE_URL }}
-        WEBSITE_SELECTOR: ${{ secrets.WEBSITE_SELECTOR }}
       run: python src/main.py
