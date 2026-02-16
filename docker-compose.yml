@@ -1,15 +1,12 @@
 services:
-  wppconnect:
-    image: wppconnect/server-cli:latest
-    container_name: wppconnect-server
+  whatsapp:
+    build: ./whatsapp-server
+    container_name: whatsapp-server
     ports:
-      - "21465:21465"
-    environment:
-      - PORT=21465
-      - HOST=0.0.0.0
-      - LOG_LEVEL=info
-      - SECRET_KEY=THISISMYSECURETOKEN
-    restart: always
+      - "4000:4000"
     volumes:
-      - ./tokens:/usr/src/app/tokens
-      - ./userDataDir:/usr/src/app/userDataDir
+      - whatsapp_session:/data/session
+    restart: always
+
+volumes:
+  whatsapp_session:

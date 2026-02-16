@@ -3,12 +3,10 @@ import os
 
 
 class WhatsAppNotifier:
-    """Sends messages via a self-hosted WPPConnect Server."""
+    """Sends messages via the local WhatsApp microservice (whatsapp-web.js)."""
 
     def __init__(self):
-        self.base_url = os.getenv('WPPCONNECT_SERVER_URL', 'http://localhost:21465')
-        self.session = os.getenv('WPPCONNECT_SESSION_KEY', 'zapdiario_session')
-        self.token = os.getenv('WPPCONNECT_TOKEN', '')
+        self.api_url = os.getenv('WHATSAPP_API_URL', 'http://localhost:4000')
         self.recipient_phone = os.getenv('WHATSAPP_RECIPIENT_PHONE')
 
     def send_message(self, message):
@@ -16,30 +14,19 @@ class WhatsAppNotifier:
             print("Error: WHATSAPP_RECIPIENT_PHONE not set.")
             return False
 
-        if not self.token:
-            print("Error: WPPCONNECT_TOKEN not set. Run generate-token first.")
-            return False
-
-        url = f"{self.base_url}/api/{self.session}/send-message"
+        url = f"{self.api_url}/send"
 
         payload = {
-            "phone": self.recipient_phone,
-            "message": message,
-            "isGroup": False
-        }
-
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': f'Bearer {self.token}'
+            "number": self.recipient_phone,
+            "message": message
         }
 
         try:
             print(f"Sending to {url}...")
-            response = requests.post(url, headers=headers, json=payload)
+            response = requests.post(url, json=payload)
 
-            if response.status_code in (200, 201):
-                print("Message sent successfully! (WPPConnect)")
+            if response.ok:
+                print("Message sent successfully!")
                 return True
             else:
                 print(f"Failed. Status: {response.status_code}, Body: {response.text}")

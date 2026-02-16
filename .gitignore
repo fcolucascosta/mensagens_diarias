@@ -6,3 +6,9 @@ venv/
 .DS_Store
 ssh-key-2026-02-16.key
 ssh-key-2026-02-16.key.pub
+tokens/
+userDataDir/
+microservice-whatsapp-main/
+whatsapp-server/node_modules/
+whatsapp-server/.wwebjs_auth/
+whatsapp-server/.wwebjs_cache/
