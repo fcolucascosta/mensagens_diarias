@@ -107,6 +107,9 @@ class WebScraper:
         # Fix verse numbers: "14Os" → "14 Os" (number directly followed by capital letter)
         text = re.sub(r'(\d+)([A-ZÁÉÍÓÚÂÊÔÃÕÇ])', r'\1 \2', text)
 
+        # Fix space before verse numbers: "pão.14" → "pão. 14"
+        text = re.sub(r'([a-záéíóúâêôãõç.!?;:,"""\'])(\d+)', r'\1 \2', text)
+
         # Now handle blank lines between specific sections
         lines = text.split('\n')
         result = []
