@@ -70,13 +70,15 @@ class WebScraper:
                 return None
 
             # Collect text after the header until the next section
-            extracted_text = [evangelho_header.get_text(strip=True)]
+            extracted_text = [evangelho_header.get_text(separator=' ', strip=True)]
 
             for sibling in evangelho_header.next_siblings:
                 if sibling.name in ['h1', 'h2', 'h3', 'h4', 'hr']:
                     break
                 if sibling.name == 'p':
-                    text = sibling.get_text(strip=True)
+                    text = sibling.get_text(separator=' ', strip=True)
+                    # Clean up multiple spaces
+                    text = re.sub(r' +', ' ', text).strip()
                     if text:
                         extracted_text.append(text)
                 elif isinstance(sibling, str):
@@ -99,16 +101,9 @@ class WebScraper:
         Formats the Evangelho text:
         - Dashes touch the text (-Aleluia instead of - Aleluia)
         - No blank lines between Aleluia/Aclamação, Proclamação/Glória, Palavra/Glória
-        - Spaces after verse numbers (14Os → 14 Os)
         """
         # Fix "- Text" → "-Text" (dash touching text)
         text = re.sub(r'^- ', '-', text, flags=re.MULTILINE)
-
-        # Fix verse numbers: "14Os" → "14 Os" (number directly followed by capital letter)
-        text = re.sub(r'(\d+)([A-ZÁÉÍÓÚÂÊÔÃÕÇ])', r'\1 \2', text)
-
-        # Fix space before verse numbers: "pão.14" → "pão. 14"
-        text = re.sub(r'([a-záéíóúâêôãõç.!?;:,"""\'])(\d+)', r'\1 \2', text)
 
         # Now handle blank lines between specific sections
         lines = text.split('\n')
