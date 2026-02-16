@@ -85,8 +85,6 @@ def main():
     if video:
         print(f"📤 Enviando vídeo de {video_source}...")
         notifier.send_message(
-            f"🎬 *Homilia de Amanhã*\n"
-            f"_{video_source}_\n\n"
             f"{video['title']}\n"
             f"{video['link']}"
         )
