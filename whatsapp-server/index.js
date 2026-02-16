@@ -9,6 +9,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ dataPath: "/data/session" }),
   puppeteer: {
     headless: true,
+    protocolTimeout: 120000, // 120s timeout for low-RAM VM
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
