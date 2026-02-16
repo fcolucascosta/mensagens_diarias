@@ -54,13 +54,17 @@ def main():
         else:
             print("⚠️ Nenhum vídeo com 'homilia' no título encontrado.")
 
-    # 6. Fetch Evangelho de AMANHÃ
-    liturgy_url = (
-        f"https://liturgia.cancaonova.com/pb/"
-        f"?sDia={tomorrow.day}&sMes={tomorrow.month:02d}&sAno={tomorrow.year}"
+    # 6. Fetch Evangelho de AMANHÃ (via calendário do site)
+    liturgy_url = web_scraper.get_liturgy_url_for_date(
+        day=tomorrow.day, month=tomorrow.month, year=tomorrow.year
     )
-    print(f"Buscando liturgia de amanhã: {liturgy_url}")
-    web_text = web_scraper.extract_text(liturgy_url)
+    
+    web_text = None
+    if liturgy_url:
+        print(f"Buscando liturgia de amanhã...")
+        web_text = web_scraper.extract_text(liturgy_url)
+    else:
+        print("⚠️ URL da liturgia de amanhã não encontrada.")
 
     # 7. Send Notifications
     if web_text:
