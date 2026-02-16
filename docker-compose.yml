@@ -2,7 +2,7 @@ version: '3'
 
 services:
   wppconnect:
-    image: wppconnect/server:latest
+    image: wppconnect-team/wppconnect-server:latest
     container_name: wppconnect-server
     ports:
       - "21465:21465"

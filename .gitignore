@@ -4,3 +4,5 @@ __pycache__/
 venv/
 .env
 .DS_Store
+ssh-key-2026-02-16.key
+ssh-key-2026-02-16.key.pub
