@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   wppconnect:
     image: wppconnect/server-cli:latest
@@ -14,3 +12,4 @@ services:
     restart: always
     volumes:
       - ./tokens:/usr/src/app/tokens
+      - ./userDataDir:/usr/src/app/userDataDir
