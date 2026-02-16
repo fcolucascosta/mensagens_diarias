@@ -30,55 +30,75 @@ def main():
     print(f"Evangelho de amanhã: {tomorrow.strftime('%d/%m/%Y')}")
     print(f"Dia da semana (hoje): {today} (0=Seg, 6=Dom)")
 
-    # 3. Choose YouTube Channel
-    # Sábado (5) = Padre Mario Sartori, outros dias = Padre Paulo Ricardo
-    if today == 5:
-        print("Sábado — usando canal do Padre Mario Sartori.")
-        target_channel_id = CHANNEL_ID_SATURDAY
+    # 3. Choose primary YouTube Channel
+    if today == 5:  # Sábado
+        print("\n📺 Sábado — canal primário: Padre Mario Sartori")
+        primary_channel = CHANNEL_ID_SATURDAY
+        fallback_channel = CHANNEL_ID_WEEKDAY
+        primary_name = "Padre Mario Sartori"
+        fallback_name = "Padre Paulo Ricardo"
     else:
-        print("Dia útil/Domingo — usando canal do Padre Paulo Ricardo.")
-        target_channel_id = CHANNEL_ID_WEEKDAY
+        print("\n📺 Dia útil/Domingo — canal primário: Padre Paulo Ricardo")
+        primary_channel = CHANNEL_ID_WEEKDAY
+        fallback_channel = CHANNEL_ID_SATURDAY
+        primary_name = "Padre Paulo Ricardo"
+        fallback_name = "Padre Mario Sartori"
 
     # 4. Initialize Modules
     yt_scraper = YouTubeScraper()
     web_scraper = WebScraper()
     notifier = WhatsAppNotifier()
 
-    # 5. Fetch YouTube Video
-    video = None
-    if target_channel_id:
-        print(f"Buscando vídeo no canal: {target_channel_id}")
-        video = yt_scraper.get_latest_video(target_channel_id, title_pattern="homilia")
-        if video:
-            print(f"✅ Vídeo encontrado: {video['title']}")
-        else:
-            print("⚠️ Nenhum vídeo com 'homilia' no título encontrado.")
+    # 5. Fetch YouTube Video (with fallback)
+    print(f"\n🔍 Buscando homilia no canal de {primary_name}...")
+    video = yt_scraper.get_latest_video(primary_channel, title_pattern="homilia", check_today=True)
+    video_source = primary_name
+
+    if not video:
+        print(f"\n🔄 Tentando fallback: {fallback_name}...")
+        video = yt_scraper.get_latest_video(fallback_channel, title_pattern="homilia", check_today=True)
+        video_source = fallback_name
 
     # 6. Fetch Evangelho de AMANHÃ (via calendário do site)
+    print(f"\n📖 Buscando Evangelho de amanhã ({tomorrow.strftime('%d/%m')})...")
     liturgy_url = web_scraper.get_liturgy_url_for_date(
         day=tomorrow.day, month=tomorrow.month, year=tomorrow.year
     )
-    
+
     web_text = None
     if liturgy_url:
-        print(f"Buscando liturgia de amanhã...")
         web_text = web_scraper.extract_text(liturgy_url)
     else:
         print("⚠️ URL da liturgia de amanhã não encontrada.")
 
     # 7. Send Notifications
+    date_str = tomorrow.strftime('%d/%m/%Y')
+
+    # Send Evangelho
     if web_text:
-        date_str = tomorrow.strftime('%d/%m/%Y')
-        print(f"Enviando Evangelho: {web_text[:50]}...")
+        print(f"\n📤 Enviando Evangelho...")
         notifier.send_message(f"📖 *Evangelho de Amanhã ({date_str})*\n\n{web_text}")
     else:
         print("⚠️ Evangelho não encontrado, pulando.")
 
+    # Send Video
     if video:
-        print(f"Enviando vídeo: {video['title']}")
-        notifier.send_message(f"🎬 *Homilia do Dia*\n{video['title']}\n{video['link']}")
+        print(f"📤 Enviando vídeo de {video_source}...")
+        notifier.send_message(
+            f"🎬 *Homilia de Amanhã*\n"
+            f"_{video_source}_\n\n"
+            f"{video['title']}\n"
+            f"{video['link']}"
+        )
     else:
-        print("⚠️ Vídeo não encontrado, pulando.")
+        print("⚠️ Nenhuma homilia encontrada em nenhum canal.")
+        notifier.send_message(
+            f"⚠️ *Homilia de Amanhã ({date_str})*\n\n"
+            f"Nenhum vídeo de homilia encontrado hoje nos canais "
+            f"de {primary_name} ou {fallback_name}."
+        )
+
+    print("\n✅ Concluído!")
 
 
 if __name__ == "__main__":
