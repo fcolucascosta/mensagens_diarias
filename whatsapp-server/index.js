@@ -52,17 +52,24 @@ app.post("/send", async (req, res) => {
     return res.status(400).json({ error: "number e message são obrigatórios" });
   }
 
-  // Remove any existing suffix, then add @c.us
   const cleanNumber = number.replace(/@[a-z.]+$/, "");
-  const chatId = `${cleanNumber}@c.us`;
 
   try {
+    // Use getNumberId to resolve the correct WhatsApp ID (workaround for LID issue)
+    const numberId = await client.getNumberId(cleanNumber);
+    
+    if (!numberId) {
+      console.error(`❌ Número ${cleanNumber} não encontrado no WhatsApp`);
+      return res.status(404).json({ error: "Número não encontrado no WhatsApp" });
+    }
+
+    const chatId = numberId._serialized;
     console.log(`📤 Enviando para ${chatId}...`);
     await client.sendMessage(chatId, message);
     console.log(`✅ Mensagem enviada para ${chatId}`);
     res.json({ status: "Mensagem enviada com sucesso" });
   } catch (err) {
-    console.error(`❌ Erro ao enviar para ${chatId}:`, err.message || err);
+    console.error(`❌ Erro ao enviar para ${cleanNumber}:`, err.message || err);
     res.status(500).json({ error: "Erro ao enviar mensagem", details: err.message });
   }
 });

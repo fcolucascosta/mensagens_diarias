@@ -9,6 +9,6 @@
   "dependencies": {
     "express": "^5.1.0",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "github:Vgshots/whatsapp-web.js-my-enhancements#my-feature"
+    "whatsapp-web.js": "^1.26.1-alpha.3"
   }
 }
