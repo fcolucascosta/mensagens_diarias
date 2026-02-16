@@ -14,8 +14,6 @@ const client = new Client({
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-gpu",
-      "--single-process",
-      "--no-zygote",
       "--disable-extensions",
       "--disable-background-timer-throttling",
       "--disable-renderer-backgrounding",
