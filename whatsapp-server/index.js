@@ -44,14 +44,18 @@ app.post("/send", async (req, res) => {
     return res.status(400).json({ error: "number e message são obrigatórios" });
   }
 
-  const chatId = number.includes("@c.us") ? number : `${number}@c.us`;
+  // Remove any existing suffix, then add @c.us
+  const cleanNumber = number.replace(/@[a-z.]+$/, "");
+  const chatId = `${cleanNumber}@c.us`;
 
   try {
+    console.log(`📤 Enviando para ${chatId}...`);
     await client.sendMessage(chatId, message);
+    console.log(`✅ Mensagem enviada para ${chatId}`);
     res.json({ status: "Mensagem enviada com sucesso" });
   } catch (err) {
-    console.error("❌ Erro ao enviar mensagem:", err);
-    res.status(500).json({ error: "Erro ao enviar mensagem" });
+    console.error(`❌ Erro ao enviar para ${chatId}:`, err.message || err);
+    res.status(500).json({ error: "Erro ao enviar mensagem", details: err.message });
   }
 });
 
