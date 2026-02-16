@@ -77,7 +77,7 @@ def main():
     # Send Evangelho
     if web_text:
         print(f"\n📤 Enviando Evangelho...")
-        notifier.send_message(f"📖 *Evangelho de Amanhã ({date_str})*\n\n{web_text}")
+        notifier.send_message(web_text)
     else:
         print("⚠️ Evangelho não encontrado, pulando.")
 

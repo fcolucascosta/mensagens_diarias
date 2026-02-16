@@ -66,7 +66,7 @@ app.post("/send", async (req, res) => {
 
     const chatId = numberId._serialized;
     console.log(`📤 Enviando para ${chatId}...`);
-    await client.sendMessage(chatId, message);
+    await client.sendMessage(chatId, message, { linkPreview: true });
     console.log(`✅ Mensagem enviada para ${chatId}`);
     res.json({ status: "Mensagem enviada com sucesso" });
   } catch (err) {

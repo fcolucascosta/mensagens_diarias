@@ -84,7 +84,8 @@ class WebScraper:
                     if text:
                         extracted_text.append(text)
 
-            return "\n\n".join(extracted_text)
+            raw_text = "\n\n".join(extracted_text)
+            return self._format_evangelho(raw_text)
 
         except requests.exceptions.RequestException as e:
             print(f"Error fetching URL {url}: {e}")
@@ -92,3 +93,59 @@ class WebScraper:
         except Exception as e:
             print(f"Error scraping text: {e}")
             return None
+
+    def _format_evangelho(self, text):
+        """
+        Formats the Evangelho text:
+        - Dashes touch the text (-Aleluia instead of - Aleluia)
+        - No blank lines between Aleluia/Aclamação, Proclamação/Glória, Palavra/Glória
+        - Spaces after verse numbers (14Os → 14 Os)
+        """
+        # Fix "- Text" → "-Text" (dash touching text)
+        text = re.sub(r'^- ', '-', text, flags=re.MULTILINE)
+
+        # Fix verse numbers: "14Os" → "14 Os" (number directly followed by capital letter)
+        text = re.sub(r'(\d+)([A-ZÁÉÍÓÚÂÊÔÃÕÇ])', r'\1 \2', text)
+
+        # Now handle blank lines between specific sections
+        lines = text.split('\n')
+        result = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            result.append(line)
+
+            # Look ahead: if current line should be joined with next (no blank line)
+            if i + 1 < len(lines):
+                next_non_empty = None
+                next_idx = i + 1
+                while next_idx < len(lines) and lines[next_idx].strip() == '':
+                    next_idx += 1
+                if next_idx < len(lines):
+                    next_non_empty = lines[next_idx].strip()
+
+                current = line.strip()
+
+                # Rules: remove blank line BETWEEN these pairs
+                should_join = False
+
+                # Aleluia → Aclamação (next line starts with -)
+                if 'Aleluia' in current and next_non_empty and next_non_empty.startswith('-'):
+                    should_join = True
+
+                # Proclamação → Glória
+                if 'Proclamação' in current and next_non_empty and 'Glória' in next_non_empty:
+                    should_join = True
+
+                # Palavra da Salvação → Glória
+                if 'Palavra da Salvação' in current and next_non_empty and 'Glória' in next_non_empty:
+                    should_join = True
+
+                if should_join:
+                    # Skip blank lines between these pairs
+                    while i + 1 < len(lines) and lines[i + 1].strip() == '':
+                        i += 1
+
+            i += 1
+
+        return '\n'.join(result)
