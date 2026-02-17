@@ -65,6 +65,13 @@ app.post("/send", async (req, res) => {
     }
 
     const chatId = numberId._serialized;
+
+    // If message contains a link, wait 5s for preview to load
+    if (message.match(/https?:\/\//)) {
+      console.log(`⏳ Link detectado, aguardando 5s para preview...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+
     console.log(`📤 Enviando para ${chatId}...`);
     await client.sendMessage(chatId, message, { linkPreview: true });
     console.log(`✅ Mensagem enviada para ${chatId}`);
