@@ -44,15 +44,15 @@ class YouTubeScraper:
             if title_pattern and not re.search(title_pattern, title, re.IGNORECASE):
                 continue
 
-            # Check if published today (convert to Brazil time!)
+            # Check if published recently (within last 28 hours)
             if check_today:
                 try:
                     pub_datetime_utc = datetime.datetime.strptime(
                         entry.published, "%Y-%m-%dT%H:%M:%S+00:00"
                     ).replace(tzinfo=datetime.timezone.utc)
-                    pub_date_br = pub_datetime_utc.astimezone(br_tz).date()
-                    if pub_date_br != today_br:
-                        print(f"  ⏭️ '{title}' — publicado em {pub_date_br}, pulando (não é de hoje)")
+                    hours_ago = (utc_now - pub_datetime_utc).total_seconds() / 3600
+                    if hours_ago > 28:
+                        print(f"  ⏭️ '{title}' — publicado há {hours_ago:.0f}h, pulando")
                         continue
                 except (ValueError, AttributeError):
                     # If we can't parse the date, accept the video anyway
