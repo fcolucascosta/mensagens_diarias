@@ -9,7 +9,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ dataPath: "/data/session" }),
   puppeteer: {
     headless: true,
-    protocolTimeout: 120000, // 120s timeout for low-RAM VM
+    protocolTimeout: 90000,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -18,6 +18,12 @@ const client = new Client({
       "--disable-extensions",
       "--disable-background-timer-throttling",
       "--disable-renderer-backgrounding",
+      "--disable-translate",
+      "--disable-sync",
+      "--disable-software-rasterizer",
+      "--disable-default-apps",
+      "--no-first-run",
+      "--js-flags=--max-old-space-size=256",
     ],
   },
 });
@@ -65,15 +71,8 @@ app.post("/send", async (req, res) => {
     }
 
     const chatId = numberId._serialized;
-
-    // If message contains a link, wait 5s for preview to load
-    if (message.match(/https?:\/\//)) {
-      console.log(`⏳ Link detectado, aguardando 5s para preview...`);
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-
     console.log(`📤 Enviando para ${chatId}...`);
-    await client.sendMessage(chatId, message, { linkPreview: true });
+    await client.sendMessage(chatId, message);
     console.log(`✅ Mensagem enviada para ${chatId}`);
     res.json({ status: "Mensagem enviada com sucesso" });
   } catch (err) {
